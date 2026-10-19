@@ -5,6 +5,7 @@ configurazione, messaggi, payload e chiamata HTTP.
 Import e gestione degli errori sono gia' presenti: conservarli.
 """
 
+import json
 import os
 
 import requests
@@ -27,7 +28,7 @@ payload = {
     "temperature": 0.2,
     "max_tokens": 300,
     "reasoning_effort": "none",
-    "stream": False,
+    "stream": True,
 }
 
 # --- Chiamata -------------------------------------------------------------
@@ -40,9 +41,22 @@ try:
             continue
         payload["messages"] = messages + [{"role": "user", "content": domanda}]
         try:
-            response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=120)
+            response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=120, stream=True)
             response.raise_for_status()
-            print(response.json()["choices"][0]["message"]["content"])
+            frammenti = []
+            for riga in response.iter_lines(decode_unicode=True):
+                if not riga or not riga.startswith("data:"):
+                    continue
+                dati = riga[5:].strip()
+                if dati == "[DONE]":
+                    break
+                scelte = json.loads(dati)["choices"]
+                frammento = scelte[0]["delta"].get("content") if scelte else None
+                if frammento:
+                    print(frammento, end="", flush=True)
+                    frammenti.append(frammento)
+            print()
+            risposta_completa = "".join(frammenti)
         except requests.exceptions.Timeout:
             print("Attesa scaduta: controllare server, carico e tempi.")
         except requests.exceptions.ConnectionError:
