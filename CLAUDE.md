@@ -7,4 +7,6 @@
 - Preferire Python sincrono e modifiche circoscritte.
 - Non aggiungere dipendenze senza motivarle e concordarle.
 - Non inserire segreti, pesi o ambiente virtuale in Git.
+- Commit in conventional commit: solo `tipo(ambito opzionale): descrizione`, senza corpo né trailer (niente Co-Authored-By).
+- Non eseguire commit o push: lasciarli all'utente e suggerire i comandi.
 - Non sono presenti test automatici in questo checkpoint.
