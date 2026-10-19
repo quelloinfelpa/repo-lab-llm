@@ -18,7 +18,6 @@ model = os.environ["LM_MODEL"]
 # --- Messaggi -------------------------------------------------------------
 messages = [
     {"role": "system", "content": "Sei un assistente conciso. Rispondi sempre in italiano."},
-    {"role": "user", "content": "Che cos'e' un modello linguistico di grandi dimensioni?"},
 ]
 
 # --- Payload --------------------------------------------------------------
@@ -33,12 +32,22 @@ payload = {
 
 # --- Chiamata -------------------------------------------------------------
 try:
-    response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=120)
-    response.raise_for_status()
-    print(response.json()["choices"][0]["message"]["content"])
-except requests.exceptions.Timeout:
-    print("Attesa scaduta: controllare server, carico e tempi.")
-except requests.exceptions.ConnectionError:
-    print("Connessione fallita: controllare server, URL e porta.")
-except requests.exceptions.HTTPError:
-    print("Errore HTTP:", response.status_code, response.text)
+    while True:
+        domanda = input("Domanda (esci per terminare): ").strip()
+        if domanda.lower() == "esci":
+            break
+        if not domanda:
+            continue
+        payload["messages"] = messages + [{"role": "user", "content": domanda}]
+        try:
+            response = requests.post(f"{base_url}/chat/completions", json=payload, timeout=120)
+            response.raise_for_status()
+            print(response.json()["choices"][0]["message"]["content"])
+        except requests.exceptions.Timeout:
+            print("Attesa scaduta: controllare server, carico e tempi.")
+        except requests.exceptions.ConnectionError:
+            print("Connessione fallita: controllare server, URL e porta.")
+        except requests.exceptions.HTTPError:
+            print("Errore HTTP:", response.status_code, response.text)
+except (KeyboardInterrupt, EOFError):
+    print()
