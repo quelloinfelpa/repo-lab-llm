@@ -57,6 +57,8 @@ try:
                     frammenti.append(frammento)
             print()
             risposta_completa = "".join(frammenti)
+            messages.append({"role": "user", "content": domanda})
+            messages.append({"role": "assistant", "content": risposta_completa})
         except requests.exceptions.Timeout:
             print("Attesa scaduta: controllare server, carico e tempi.")
         except requests.exceptions.ConnectionError:
